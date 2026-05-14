@@ -13,7 +13,8 @@ class BST {
     T value;
     int count;
     Node *left, *right;
-    Node(T val) : value(val), count(1), left(nullptr), right(nullptr) {}
+    explicit Node(T val) : value(val), count(1),
+                           left(nullptr), right(nullptr) {}
   };
 
  private:
@@ -33,7 +34,9 @@ class BST {
 
   int getDepth(Node* node) {
     if (!node) return 0;
-    return std::max(getDepth(node->left), getDepth(node->right)) + 1;
+    int l = getDepth(node->left);
+    int r = getDepth(node->right);
+    return (l > r ? l : r) + 1;
   }
 
   Node* searchNode(Node* node, T value) {
@@ -53,9 +56,12 @@ class BST {
   BST() : root(nullptr) {}
   void add(T value) { root = addNode(root, value); }
   int depth() { return root ? getDepth(root) - 1 : 0; }
-  bool search(T value) { return searchNode(root, value) != nullptr; }
   
-  // Для Задания №3
+  int search(T value) {
+    Node* found = searchNode(root, value);
+    return found ? found->count : 0;
+  }
+
   std::vector<Node*> getNodes() {
     std::vector<Node*> nodes;
     collectNodes(root, nodes);
