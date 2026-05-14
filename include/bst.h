@@ -56,7 +56,7 @@ class BST {
   BST() : root(nullptr) {}
   void add(T value) { root = addNode(root, value); }
   int depth() { return root ? getDepth(root) - 1 : 0; }
-  
+
   int search(T value) {
     Node* found = searchNode(root, value);
     return found ? found->count : 0;
