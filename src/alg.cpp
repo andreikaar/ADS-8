@@ -1,38 +1,68 @@
-// Copyright 2025 NNTU-CS
-#include <fstream>
+// Copyright 2021 NNTU-CS
 #include <iostream>
-#include <string>
+#include <fstream>
 #include <vector>
 #include <algorithm>
+#include <cctype>
+#include <utility>
+#include <string>
 #include "bst.h"
 
 void makeTree(BST<std::string>& tree, const char* filename) {
   std::ifstream file(filename);
-  if (!file) return;
-  std::string word = "";
-  char ch;
-  while (file.get(ch)) {
-    if (isalpha(static_cast<unsigned char>(ch))) {
-      word += tolower(static_cast<unsigned char>(ch));
-    } else if (!word.empty()) {
-      tree.add(word);
-      word = "";
+  if (!file) {
+    std::cout << "File error!" << std::endl;
+    return;
+  }
+
+  std::string word;
+  while (!file.eof()) {
+    int ch = file.get();
+    if (file.eof()) {
+      break;
+    }
+
+    if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
+      word += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    } else {
+      if (!word.empty()) {
+        tree.insert(word);
+        word.clear();
+      }
     }
   }
-  if (!word.empty()) tree.add(word);
+
+  if (!word.empty()) {
+    tree.insert(word);
+  }
+
   file.close();
 }
 
 void printFreq(BST<std::string>& tree) {
-  auto nodes = tree.getNodes();
-  std::sort(nodes.begin(), nodes.end(),
-    [](BST<std::string>::Node* a, BST<std::string>::Node* b) {
-    return a->count > b->count;
-  });
-  std::ofstream out("result/freq.txt");
-  for (auto node : nodes) {
-    if (out.is_open()) {
-      out << node->value << " " << node->count << "\n";
-    }
+  std::vector<std::pair<std::string, int>> pairs = tree.getAllSortedByKey();
+
+  std::sort(pairs.begin(), pairs.end(),
+    [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+      if (a.second != b.second) {
+        return a.second > b.second;
+      }
+      return a.first < b.first;
+    });
+
+  for (const auto& p : pairs) {
+    std::cout << p.first << " : " << p.second << "\n";
   }
+
+  std::ofstream out("result/freq.txt");
+  if (!out) {
+    std::cout << "Cannot open result/freq.txt for writing!" << std::endl;
+    return;
+  }
+
+  for (const auto& p : pairs) {
+    out << p.first << " : " << p.second << "\n";
+  }
+
+  out.close();
 }
